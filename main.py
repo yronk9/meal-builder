@@ -53,14 +53,14 @@ app = tk.Tk()
 app.title("meal builder")
 app.geometry("400x300")
 
-label = tk.Label(app, text="enter some food item:")
-label.pack()
+label = tk.Label(app, text="Enter food:")
+label.place(x=0,y=0)
 
 entry = tk.Entry(app)
 entry.pack()
 
 submit_button = tk.Button(app, text="Submit", command=on_submit)
-submit_button.pack()
+submit_button.place(x=300,y=3)
 
 listbox = tk.Listbox(app)
 listbox.pack()
@@ -68,7 +68,7 @@ listbox.pack()
 update_listbox()
 
 clear = tk.Button(app, text="clear list", command=clear_box)
-clear.pack()
+clear.place(x=25,y=50)
 
 # The following centres the app on open
 screen_width = app.winfo_screenwidth()
