@@ -1,87 +1,75 @@
-import tkinter as tk
+import PySimpleGUI as sg
 import sqlite3
 
 def create_database():
-	conn = sqlite3.connect("names.db")
-	c = conn.cursor()
+    conn = sqlite3.connect("names.db")
+    c = conn.cursor()
 
-	c. execute("""CREATE TABLE IF NOT EXISTS names (
+    c.execute("""CREATE TABLE IF NOT EXISTS names (
 		id INTEGER PRIMARY KEY,
 		name TEXT
 		)""")
-	conn.commit()
-	conn.close()
+    conn.commit()
+    conn.close()
 
 def on_submit():
-	name = entry.get()
-	conn = sqlite3.connect("names.db")
-	c = conn.cursor()
+    name = input_field.get()
+    conn = sqlite3.connect("names.db")
+    c = conn.cursor()
 
-	c.execute("INSERT INTO names (name) VALUES (?)", (name,))
-	conn.commit()
+    c.execute("INSERT INTO names (name) VALUES (?)", (name,))
+    conn.commit()
 
-	update_listbox()
-	conn.close()
+    update_listbox()
+    input_field.update('') # Clear the input field here
+    conn.close()
 
 def clear_box():
-	name = entry.get()
-	conn = sqlite3.connect("names.db")
-	c = conn.cursor()
+    conn = sqlite3.connect("names.db")
+    c = conn.cursor()
 
-	c.execute("DELETE FROM names")
-	conn.commit()
+    c.execute("DELETE FROM names")
+    conn.commit()
 
-	update_listbox()
-	conn.close()
+    update_listbox()
+    conn.close()
 
 def update_listbox():
-	conn = sqlite3.connect("names.db")
-	c = conn.cursor()
+    conn = sqlite3.connect("names.db")
+    c = conn.cursor()
 
-	c.execute("SELECT * FROM names")
-	rows = c.fetchall()
+    c.execute("SELECT * FROM names")
+    rows = c.fetchall()
 
-	listbox.delete(0, tk.END)
-	for row in rows:
-		listbox.insert(tk.END, row[1])
+    listbox.Update(values=[row[1] for row in rows])
 
-	conn.close()
+    conn.close()
 
 create_database()
 
-app = tk.Tk()
-app.title("meal builder")
-app.geometry("400x300")
+layout = [
+    [sg.Text("Enter Food:"), input_field := sg.Input(key="-INPUT-")],
+    [submit_button := sg.Button("Submit"), clear_button := sg.Button("Clear List")],
+    [listbox := sg.Listbox(values=[], key="-LISTBOX-", size=(40, 10), font="Helvetica 16")]
+]
 
-label = tk.Label(app, text="Enter food:")
-label.place(x=0,y=0)
+# Build the Window
+window = sg.Window("Meal Builder", layout, finalize=True)
 
-entry = tk.Entry(app)
-entry.pack()
-
-submit_button = tk.Button(app, text="Submit", command=on_submit)
-submit_button.place(x=300,y=3)
-
-listbox = tk.Listbox(app)
-listbox.pack()
-
+# Load the listbox content initially
 update_listbox()
 
-clear = tk.Button(app, text="clear list", command=clear_box)
-clear.place(x=25,y=50)
+while True:
+    event, values = window.read()
+    
+    if event in (None, "Exit"):
+        break
+    elif event == "-INPUT-":
+        pass
+    elif event == "Submit":
+        on_submit()
+        input_field.set_focus() # Return focus to the Input field
+    elif event == "Clear List":
+        clear_box()
 
-# The following centres the app on open
-screen_width = app.winfo_screenwidth()
-screen_height = app.winfo_screenheight()
-
-# Calculate half the screen and window sizes
-window_width = 400
-window_height = 300
-half_screen_width = int(screen_width / 2 - window_width / 2)
-half_screen_height = int(screen_height / 2 - window_height / 2)
-
-# Set the geometry with calculated coordinates
-app.geometry(f"{window_width}x{window_height}+{half_screen_width}+{half_screen_height}")
-
-
-app.mainloop()
+window.Close()
